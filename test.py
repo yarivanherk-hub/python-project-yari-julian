@@ -14,7 +14,7 @@ clock = pygame.time.Clock()
 WHITE = (255, 255, 255)
 RED = (255, 50, 50)
 BLUE = (50, 150, 255)
-BLACK = (0, 0, 0)
+BLACK = (0, 0, 0) 
 GREEN = (0, 255, 0)
 
 font = pygame.font.SysFont(None, 36)
