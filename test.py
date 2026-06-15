@@ -2,11 +2,21 @@ import pygame
 import random
 
 pygame.init()
-
 # Scherm
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Galactic Uprising")
+
+
+player_img = pygame.image.load("resources/player.jpg").convert_alpha()
+enemy_img = pygame.image.load("resources/enemy1.webp").convert_alpha()
+bullet_img = pygame.image.load("resources/bullet").convert_alpha()
+
+player_img = pygame.transform.scale(player_img, (50, 50))
+enemy_img = pygame.transform.scale(enemy_img, (40, 40))
+bullet_img = pygame.transform.scale(bullet_img, (50, 60))
+
+
 
 clock = pygame.time.Clock()
 
@@ -35,6 +45,17 @@ lives = 3
 
 running = True
 
+upgrade = None
+upgrade_timer = 0
+
+rapid_fire = False
+triple_shot = False
+shield = False
+speed_boost = False
+
+fire_delay = 15
+fire_counter = 0
+
 while running:
     clock.tick(60)
 
@@ -57,16 +78,36 @@ while running:
     # Input
     keys = pygame.key.get_pressed()
 
+    speed = player_speed
+    
+    if speed_boost:
+        speed = 10
+
     if keys[pygame.K_LEFT] and player.left > 0:
-        player.x -= player_speed
+        player.x -= speed
 
     if keys[pygame.K_RIGHT] and player.right < WIDTH:
-        player.x += player_speed
+        player.x += speed
 
+    fire_counter += 1
+
+    if keys[pygame.K_SPACE]:
+
+        delay = 5 if rapid_fire else 15
+
+        if fire_counter >= delay:
+            fire_counter = 0
+
+            if triple_shot:
+                bullets.append(pygame.Rect(player.centerx - 15, player.top, 6, 15))
+                bullets.append(pygame.Rect(player.centerx, player.top, 6, 15))
+                bullets.append(pygame.Rect(player.centerx + 15, player.top, 6, 15))
+            else:
+                bullets.append(pygame.Rect(player.centerx - 3, player.top, 6, 15))
     # Spawn enemies
     enemy_spawn_timer += 1
 
-    if enemy_spawn_timer > 40:
+    if enemy_spawn_timer > 70:
         enemy_spawn_timer = 0
 
         enemies.append(
@@ -87,7 +128,7 @@ while running:
 
     # Move enemies
     for enemy in enemies[:]:
-        enemy.y += 3
+        enemy.y += 2
 
         if enemy.top > HEIGHT:
             enemies.remove(enemy)
@@ -95,7 +136,51 @@ while running:
 
         if enemy.colliderect(player):
             enemies.remove(enemy)
-            lives -= 1
+
+            if shield:
+                shield = False
+            else:
+                lives -= 1
+    # move upgrades
+    if upgrade:
+        upgrade.y += 3
+
+        if upgrade.y > HEIGHT:
+            upgrade = None
+
+        elif player.colliderect(upgrade):
+
+            choice = random.choice(["rapid", "triple", "shield", "speed"])
+
+            if choice == "rapid":
+                rapid_fire = True
+
+            elif choice == "triple":
+                triple_shot = True
+
+            elif choice == "shield":
+                shield = True
+
+            elif choice == "speed":
+                speed_boost = True
+
+        upgrade = None
+
+        choice = random.choice(["rapid", "triple", "shield", "speed"])
+
+        if choice == "rapid":
+            rapid_fire = True
+
+        if choice == "triple":
+            triple_shot = True
+
+        if choice == "shield":
+            shield = True
+
+        if choice == "speed":
+            speed_boost = True
+
+        upgrade = None
 
     # Bullet collisions
     for bullet in bullets[:]:
@@ -110,38 +195,82 @@ while running:
                     enemies.remove(enemy)
 
                 score += 10
-                break
 
+                # 30% kans op upgrade
+                if random.random() < 0.3:
+                    upgrade = pygame.Rect(
+                        enemy.x,
+                        enemy.y,
+                        30,
+                        30
+                )
+
+                break
     # Game over
     if lives <= 0:
         running = False
 
     # Draw
+    upgrade_text = "Geen upgrade"
+
+    if rapid_fire:
+        upgrade_text = "Rapid Fire"
+
+    elif triple_shot:
+        upgrade_text = "Triple Shot"
+
+    elif shield:
+        upgrade_text = "Shield"
+
+    elif speed_boost:
+        upgrade_text = "Speed Boost"
+    
     screen.fill(BLACK)
 
-    pygame.draw.rect(screen, BLUE, player)
+    screen.blit(player_img, player)
 
     for bullet in bullets:
-        pygame.draw.rect(screen, GREEN, bullet)
+        screen.blit(bullet_img, bullet)
 
     for enemy in enemies:
-        pygame.draw.rect(screen, RED, enemy)
+        screen.blit(enemy_img, enemy)
+        
 
-    score_text = font.render(
-        f"Score: {score}",
-        True,
-        WHITE
-    )
+    if rapid_fire:
+        upgrade_text = "Rapid Fire"
 
-    lives_text = font.render(
-        f"Lives: {lives}",
-        True,
-        WHITE
-    )
+    elif triple_shot:
+        upgrade_text = "Triple Shot"
 
-    screen.blit(score_text, (10, 10))
-    screen.blit(lives_text, (10, 50))
+    elif shield:
+        upgrade_text = "Shield"
 
-    pygame.display.flip()
+    elif speed_boost:
+        upgrade_text = "Speed Boost"
+
+upgrade_surface = font.render(
+    f"Upgrade: {upgrade_text}",
+    True,
+    WHITE
+)
+
+screen.blit(upgrade_surface, (10, 90))
+
+score_text = font.render(
+    f"Score: {score}",
+    True,
+    WHITE
+)
+
+lives_text = font.render(
+    f"Lives: {lives}",
+    True,
+    WHITE
+)
+
+screen.blit(score_text, (10, 10))
+screen.blit(lives_text, (10, 50))
+
+pygame.display.flip()
 
 pygame.quit()
