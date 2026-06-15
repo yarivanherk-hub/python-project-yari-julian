@@ -211,20 +211,6 @@ while running:
         running = False
 
     # Draw
-    upgrade_text = "Geen upgrade"
-
-    if rapid_fire:
-        upgrade_text = "Rapid Fire"
-
-    elif triple_shot:
-        upgrade_text = "Triple Shot"
-
-    elif shield:
-        upgrade_text = "Shield"
-
-    elif speed_boost:
-        upgrade_text = "Speed Boost"
-    
     screen.fill(BLACK)
 
     screen.blit(player_img, player)
@@ -234,43 +220,42 @@ while running:
 
     for enemy in enemies:
         screen.blit(enemy_img, enemy)
-        
+
+    # Upgrade tekst bepalen
+    upgrade_text = "Geen upgrade"
 
     if rapid_fire:
         upgrade_text = "Rapid Fire"
-
     elif triple_shot:
         upgrade_text = "Triple Shot"
-
     elif shield:
         upgrade_text = "Shield"
-
     elif speed_boost:
         upgrade_text = "Speed Boost"
 
-upgrade_surface = font.render(
-    f"Upgrade: {upgrade_text}",
-    True,
-    WHITE
-)
+    upgrade_surface = font.render(
+        f"Upgrade: {upgrade_text}",
+        True,
+        WHITE
+    )
 
-screen.blit(upgrade_surface, (10, 90))
+    screen.blit(upgrade_surface, (10, 90))
 
-score_text = font.render(
-    f"Score: {score}",
-    True,
-    WHITE
-)
+    score_text = font.render(
+        f"Score: {score}",
+        True,
+        WHITE
+    )
 
-lives_text = font.render(
-    f"Lives: {lives}",
-    True,
-    WHITE
-)
+    lives_text = font.render(
+        f"Lives: {lives}",
+        True,
+        WHITE
+    )
 
-screen.blit(score_text, (10, 10))
-screen.blit(lives_text, (10, 50))
+    screen.blit(score_text, (10, 10))
+    screen.blit(lives_text, (10, 50))
 
-pygame.display.flip()
+    pygame.display.flip()
 
 pygame.quit()
