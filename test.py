@@ -31,7 +31,7 @@ font = pygame.font.SysFont(None, 36)
 
 # Player
 player = pygame.Rect(WIDTH // 2 - 25, HEIGHT - 70, 50, 50)
-player_speed = 6
+player_speed = 5
 
 # Bullets
 bullets = []
@@ -48,10 +48,10 @@ running = True
 upgrade = None
 upgrade_timer = 0
 
-rapid_fire = False
-triple_shot = False
+rapid_fire_level = 0
+triple_shot_level = 0
 shield = False
-speed_boost = False
+speed_level = 0
 
 fire_delay = 15
 fire_counter = 0
@@ -78,10 +78,7 @@ while running:
     # Input
     keys = pygame.key.get_pressed()
 
-    speed = player_speed
-    
-    if speed_boost:
-        speed = 10
+    speed = min(player_speed + speed_level * 0.4, 10)
 
     if keys[pygame.K_LEFT] and player.left > 0:
         player.x -= speed
@@ -93,12 +90,22 @@ while running:
 
     if keys[pygame.K_SPACE]:
 
-        delay = 5 if rapid_fire else 15
+        delay = max(3, 15 - rapid_fire_level * 0.6)
 
         if fire_counter >= delay:
             fire_counter = 0
 
-            if triple_shot:
+           
+
+            if triple_shot_level >= 2:
+
+                bullets.append(pygame.Rect(player.centerx - 30, player.top, 6, 15))
+                bullets.append(pygame.Rect(player.centerx - 15, player.top, 6, 15))
+                bullets.append(pygame.Rect(player.centerx, player.top, 6, 15))
+                bullets.append(pygame.Rect(player.centerx + 15, player.top, 6, 15))
+                bullets.append(pygame.Rect(player.centerx + 30, player.top, 6, 15))
+            
+            elif triple_shot_level >= 1:
                 bullets.append(pygame.Rect(player.centerx - 15, player.top, 6, 15))
                 bullets.append(pygame.Rect(player.centerx, player.top, 6, 15))
                 bullets.append(pygame.Rect(player.centerx + 15, player.top, 6, 15))
@@ -149,38 +156,23 @@ while running:
             upgrade = None
 
         elif player.colliderect(upgrade):
-
+        
             choice = random.choice(["rapid", "triple", "shield", "speed"])
 
             if choice == "rapid":
-                rapid_fire = True
+                rapid_fire_level += 1
 
             elif choice == "triple":
-                triple_shot = True
+               triple_shot_level += 1
 
             elif choice == "shield":
                 shield = True
 
             elif choice == "speed":
-                speed_boost = True
+                speed_level += 1
 
         upgrade = None
 
-        choice = random.choice(["rapid", "triple", "shield", "speed"])
-
-        if choice == "rapid":
-            rapid_fire = True
-
-        if choice == "triple":
-            triple_shot = True
-
-        if choice == "shield":
-            shield = True
-
-        if choice == "speed":
-            speed_boost = True
-
-        upgrade = None
 
     # Bullet collisions
     for bullet in bullets[:]:
@@ -196,8 +188,8 @@ while running:
 
                 score += 10
 
-                # 30% kans op upgrade
-                if random.random() < 0.3:
+                #kans op upgrade
+                if random.random() < 0.1:
                     upgrade = pygame.Rect(
                         enemy.x,
                         enemy.y,
@@ -224,14 +216,14 @@ while running:
     # Upgrade tekst bepalen
     upgrade_text = "Geen upgrade"
 
-    if rapid_fire:
-        upgrade_text = "Rapid Fire"
-    elif triple_shot:
-        upgrade_text = "Triple Shot"
+    if rapid_fire_level > 0:
+        upgrade_text = f"Rapid Fire Lv.{rapid_fire_level}"
+    elif triple_shot_level > 0:
+        upgrade_text = f"Triple Shot Lv.{triple_shot_level}"
     elif shield:
         upgrade_text = "Shield"
-    elif speed_boost:
-        upgrade_text = "Speed Boost"
+    elif speed_level > 0:
+        upgrade_text = f"Speed Boost Lv.{speed_level}"
 
     upgrade_surface = font.render(
         f"Upgrade: {upgrade_text}",
