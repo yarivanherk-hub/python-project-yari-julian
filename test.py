@@ -261,8 +261,8 @@ while running:
     
 
         # Draw
-        screen.fill(BLACK)
-
+        background = pygame.image.load("sterrenachtergrond")
+        screen.blit(background, (0, 0))
         screen.blit(player_img, player)
 
         if upgrade:
