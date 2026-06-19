@@ -330,6 +330,11 @@ while running:
         #draw boss
         if boss:
 
+            background = pygame.image.load("sterrenachtergrond")
+            screen.blit(background, (0, 0))
+            screen.blit(player_img, player)
+
+
             screen.blit(
                 bossfight1_img,
                 boss["rect"]
