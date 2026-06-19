@@ -9,12 +9,16 @@ pygame.display.set_caption("Galactic Uprising")
 
 
 player_img = pygame.image.load("resources/player.jpg").convert_alpha()
-enemy_img = pygame.image.load("resources/enemy1.webp").convert_alpha()
+enemy_img= pygame.image.load("resources/enemy1.webp").convert_alpha()
+enemy2_img = pygame.image.load("resources/enemy2.jpg").convert_alpha()
 bullet_img = pygame.image.load("resources/bullet").convert_alpha()
+bossfight1_img = pygame.image.load("resources/bossfight.jpg").convert_alpha()
 
 player_img = pygame.transform.scale(player_img, (50, 50))
 enemy_img = pygame.transform.scale(enemy_img, (40, 40))
+enemy2_img = pygame.transform.scale(enemy2_img, (50, 50))
 bullet_img = pygame.transform.scale(bullet_img, (50, 60))
+bossfight1_img = pygame.transform.scale(bossfight1_img, (80, 90))
 
 
 
@@ -43,13 +47,17 @@ enemy_spawn_timer = 0
 score = 0
 lives = 3
 
+#Bossfight
+boss = None
+boss_spawned = False
+
 running = True
 
 game_state = "menu"
 
 highscore = 0
 
-upgrade = None
+upgrades = []
 upgrade_timer = 0
 
 rapid_fire_level = 0
@@ -102,6 +110,8 @@ while running:
             lives = 3
             bullets.clear()
             enemies.clear()
+            boss = None
+            boss_spawned = False
 
             rapid_fire_level = 0
             triple_shot_level = 0
@@ -112,7 +122,7 @@ while running:
 
 
     elif game_state == "playing":
-        # jouw huidige game code
+        #huidige game code
 
         # Events
         if event.type == pygame.QUIT:
@@ -171,14 +181,20 @@ while running:
         if enemy_spawn_timer > 70:
             enemy_spawn_timer = 0
 
-            enemies.append(
-                pygame.Rect(
-                    random.randint(0, WIDTH - 40),
-                    -40,
-                    40,
-                    40
-                )
-            )
+            if random.random() < 0.2:  #kans op sterke enemy
+                enemies.append({
+                "rect": pygame.Rect(random.randint(0, WIDTH - 50), -50, 50, 50),
+                "health": 3,
+                "speed": 1,
+                "type": "strong"
+            })
+            else:
+                enemies.append({
+                "rect": pygame.Rect(random.randint(0, WIDTH - 40), -40, 40, 40),
+                "health": 1,
+                "speed": 2,
+                "type": "normal"
+            })
 
         # Move bullets
         for bullet in bullets[:]:
@@ -189,13 +205,13 @@ while running:
 
         # Move enemies
         for enemy in enemies[:]:
-            enemy.y += 2
+            enemy["rect"].y += enemy["speed"]
             
-            if enemy.top > HEIGHT:
+            if enemy["rect"].top > HEIGHT:
                 enemies.remove(enemy)
                 lives -= 1
 
-            elif enemy.colliderect(player):
+            elif enemy["rect"].colliderect(player):
                 enemies.remove(enemy)
 
                 if shield:
@@ -203,16 +219,16 @@ while running:
                 else:
                     lives -= 1
         # move upgrades
-        if upgrade:
+        for upgrade in upgrades[:]:
             upgrade["rect"].y += 3
 
             if upgrade["rect"].y > HEIGHT:
-             upgrade = None
+                upgrades.remove(upgrade)
 
             elif player.colliderect(upgrade["rect"]):
-        
-                choice = upgrade["type"]
 
+                choice = upgrade["type"]
+ 
                 if choice == "rapid":
                     rapid_fire_level += 1
 
@@ -225,31 +241,79 @@ while running:
                 elif choice == "speed":
                     speed_level += 1
 
-                upgrade = None
+                upgrades.remove(upgrade)
 
 
         # Bullet collisions
         for bullet in bullets[:]:
             for enemy in enemies[:]:
 
-                if bullet.colliderect(enemy):
-
+                if bullet.colliderect(enemy["rect"]):
                     if bullet in bullets:
                         bullets.remove(bullet)
 
-                    if enemy in enemies:
-                        enemies.remove(enemy)
+                        enemy["health"] -= 1
 
-                    score += 10
+                        if enemy["health"] <= 0:
 
-                    #kans op upgrade
-                    if random.random() < 0.5:
-                        upgrade = {
-                            "rect": pygame.Rect(enemy.x, enemy.y, 30, 30),
-                          "type": random.choice(["rapid", "triple", "shield", "speed"])
-                     }
+                            enemies.remove(enemy)
 
-                break
+                            if enemy["type"] == "strong":
+                                score += 30
+                            else:
+                                score += 10
+
+                            if random.random() < 0.2:
+                                upgrades.append ({
+                                    "rect": pygame.Rect(enemy["rect"].x,
+                                        enemy["rect"].y,
+                                        30,
+                                        30),
+                                    "type": random.choice(
+                                        ["rapid", "triple", "shield", "speed"]
+                                    )
+                                })
+
+                    
+
+                    break
+
+        if boss:
+            for bullet in bullets[:]:
+
+                if boss and bullet.colliderect(boss["rect"]):
+
+                    bullets.remove(bullet)
+
+                    boss["health"] -= 1
+
+                    print("Boss geraakt!", boss["health"])
+
+                    if boss["health"] <= 0:
+                        score += 500
+                        boss = None
+
+                
+            
+        if score >= 1000 and not boss_spawned:
+            boss = {
+                "rect": pygame.Rect(WIDTH // 2 - 100, 50, 200, 100),
+                "health": 100,
+                "speed": 3,
+                "direction": 1
+            }
+
+            boss_spawned = True
+            enemies.clear() #alle andere enemies weg
+
+        # Boss movement
+        if boss:
+
+            boss["rect"].x += boss["speed"] * boss["direction"]
+
+            if boss["rect"].left <= 0 or boss["rect"].right >= WIDTH:
+                boss["direction"] *= -1
+
         # Game over
         if lives <= 0:
 
@@ -263,31 +327,60 @@ while running:
         # Draw
         screen.fill(BLACK)
 
-        screen.blit(player_img, player)
+        #draw boss
+        if boss:
 
-        if upgrade:
+            screen.blit(
+                bossfight1_img,
+                boss["rect"]
+            )
 
-            color = WHITE
+            # health bar
+            pygame.draw.rect(
+                screen,
+                RED,
+                (200, 20, 400, 20)
+            )
 
-            if upgrade["type"] == "rapid":
-                color = RED
+            pygame.draw.rect(
+                screen,
+                GREEN,
+                (200, 20, boss["health"] * 4, 20)
+            )
+        
+        #draw enemies
+        for enemy in enemies:
 
-            elif upgrade["type"] == "triple":
-                color = BLUE
+            if enemy["type"] == "strong":
+                screen.blit(enemy2_img, enemy["rect"])
+            else:
+                screen.blit(enemy_img, enemy["rect"])
 
-            elif upgrade["type"] == "shield":
-                color = GREEN
+        if upgrades:
 
-            elif upgrade["type"] == "speed":
-                color = (255, 255, 0)  # geel
+            for upgrade in upgrades:
+                color = WHITE
 
-            pygame.draw.rect(screen, color, upgrade["rect"])
+                if upgrade["type"] == "rapid":
+                    color = RED
+
+                elif upgrade["type"] == "triple":
+                    color = BLUE
+
+                elif upgrade["type"] == "shield":
+                    color = GREEN
+
+                elif upgrade["type"] == "speed":
+                    color = (255, 255, 0)  # geel
+
+                pygame.draw.rect(screen, color, upgrade["rect"])
 
         for bullet in bullets:
             screen.blit(bullet_img, bullet)
 
-        for enemy in enemies:
-            screen.blit(enemy_img, enemy)
+        
+        screen.blit(player_img, player)
+
 
         # Upgrade tekst bepalen
         upgrade_text = "Geen upgrade"
@@ -371,7 +464,7 @@ while running:
                 speed_level = 0
                 shield = False
 
-                upgrade = None
+                upgrades.clear()
 
                 player.x = WIDTH // 2 - 25
                 player.y = HEIGHT - 70
