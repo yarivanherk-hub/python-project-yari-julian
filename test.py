@@ -14,6 +14,7 @@ enemy2_img = pygame.image.load("resources/enemy2.jpg").convert_alpha()
 bullet_img = pygame.image.load("resources/bullet").convert_alpha()
 bossfight1_img = pygame.image.load("resources/bossfight.jpg").convert_alpha()
 
+
 player_img = pygame.transform.scale(player_img, (50, 50))
 enemy_img = pygame.transform.scale(enemy_img, (40, 40))
 enemy2_img = pygame.transform.scale(enemy2_img, (50, 50))
@@ -330,7 +331,7 @@ while running:
         #draw boss
         if boss:
 
-            background = pygame.image.load("sterrenachtergrond")
+            background = pygame.image.load("resources/achtergrondsterren.jpg")
             screen.blit(background, (0, 0))
             screen.blit(player_img, player)
 
