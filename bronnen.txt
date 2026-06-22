@@ -1,8 +1,9 @@
-bronnen https://weredi-catch.notion.site/Les-1-Lijsten-189aa23213098106b8cbde36dc4509a1  
-#bronnen https://weredi-catch.notion.site/Les-2-Try-en-except-189aa232130981469b1ce9afc3b077a8
-#bronnen https://weredi-catch.notion.site/Les-3-De-for-loop-189aa232130981b39f2adb712f79d179
-#bronnen https://weredi-catch.notion.site/Les-4-Werken-met-strings-189aa23213098140ac58d3fbb767f2c7
-#bronnen https://weredi-catch.notion.site/Les-5-Werken-met-modules-189aa232130981fe93ddd842b1d790a7
-#bronnen https://weredi-catch.notion.site/Les-6-Dictionaries-189aa2321309818d9229ce35b369f339
-#bronnen https://weredi-catch.notion.site/Les-8-Werken-met-klassen-189aa2321309817ba670fc57d8615cbe
-#bronnen https://weredi-catch.notion.site/Les-9-Zelf-klassen-maken-189aa232130981d28941e4aefc3ac152
+#https://weredi-catch.notion.site/Les-1-Lijsten-189aa23213098106b8cbde36dc4509a1  
+#https://weredi-catch.notion.site/Les-2-Try-en-except-189aa232130981469b1ce9afc3b077a8
+#https://weredi-catch.notion.site/Les-3-De-for-loop-189aa232130981b39f2adb712f79d179
+#https://weredi-catch.notion.site/Les-4-Werken-met-strings-189aa23213098140ac58d3fbb767f2c7
+#https://weredi-catch.notion.site/Les-5-Werken-met-modules-189aa232130981fe93ddd842b1d790a7
+#https://weredi-catch.notion.site/Les-6-Dictionaries-189aa2321309818d9229ce35b369f339
+#https://weredi-catch.notion.site/Les-8-Werken-met-klassen-189aa2321309817ba670fc57d8615cbe
+#https://weredi-catch.notion.site/Les-9-Zelf-klassen-maken-189aa232130981d28941e4aefc3ac152
+#https://chatgpt.com/share/6a392099-87e0-83ed-b358-c9e5c1e73a52
