@@ -7,12 +7,14 @@ WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Galactic Uprising")
 
+background = pygame.image.load("resources/achtergrondsterren.jpg")
 
 player_img = pygame.image.load("resources/player.jpg").convert_alpha()
 enemy_img= pygame.image.load("resources/enemy1.webp").convert_alpha()
 enemy2_img = pygame.image.load("resources/enemy2.jpg").convert_alpha()
 bullet_img = pygame.image.load("resources/bullet").convert_alpha()
 bossfight1_img = pygame.image.load("resources/bossfight.jpg").convert_alpha()
+bossfight2_img = pygame.image.load("resources/bossfight2.jpg").convert_alpha()
 
 
 player_img = pygame.transform.scale(player_img, (50, 50))
@@ -20,6 +22,7 @@ enemy_img = pygame.transform.scale(enemy_img, (40, 40))
 enemy2_img = pygame.transform.scale(enemy2_img, (50, 50))
 bullet_img = pygame.transform.scale(bullet_img, (50, 60))
 bossfight1_img = pygame.transform.scale(bossfight1_img, (80, 90))
+bossfight2_img = pygame.transform.scale(bossfight2_img, (80, 90))
 
 
 
@@ -48,9 +51,13 @@ enemy_spawn_timer = 0
 score = 0
 lives = 3
 
-#Bossfight
-boss = None
-boss_spawned = False
+#Bossfights
+boss1 = None
+boss1_spawned = False
+boss1_defeated = False
+boss2 = None
+boss2_spawned = False
+
 
 running = True
 
@@ -111,8 +118,8 @@ while running:
             lives = 3
             bullets.clear()
             enemies.clear()
-            boss = None
-            boss_spawned = False
+            boss1 = None
+            boss1_spawned = False
 
             rapid_fire_level = 0
             triple_shot_level = 0
@@ -279,41 +286,73 @@ while running:
 
                     break
 
-        if boss:
+        if boss1:
             for bullet in bullets[:]:
 
-                if boss and bullet.colliderect(boss["rect"]):
+                if boss1 and bullet.colliderect(boss1["rect"]):
 
                     bullets.remove(bullet)
 
-                    boss["health"] -= 1
+                    boss1["health"] -= 1
 
-                    print("Boss geraakt!", boss["health"])
+                    print("Boss geraakt!", boss1["health"])
 
-                    if boss["health"] <= 0:
+                    if boss1["health"] <= 0:
                         score += 500
-                        boss = None
+                        boss1 = None
+                        boss1_defeated = True
+        
+        if boss2 is not None:
+            for bullet in bullets[:]:
+                if bullet.colliderect(boss2["rect"]):
+                    bullets.remove(bullet)
+                    boss2["health"] -= 1
+
+                    if boss2["health"] <= 0:
+                        score += 1000
+                        boss2 = None
+        
+
 
                 
             
-        if score >= 1000 and not boss_spawned:
-            boss = {
+        if score >= 1000 and not boss1_spawned:
+            boss1 = {
                 "rect": pygame.Rect(WIDTH // 2 - 100, 50, 200, 100),
                 "health": 100,
                 "speed": 3,
                 "direction": 1
             }
 
-            boss_spawned = True
+            boss1_spawned = True
             enemies.clear() #alle andere enemies weg
+ 
+        if boss1_defeated and score >= 3000 and not boss2_spawned:
+
+            boss2 = {
+                "rect": pygame.Rect(WIDTH // 2 - 120, 50, 240, 120),
+                "health": 200,
+                "speed": 5,
+                "direction": 1
+            }
+
+            boss2_spawned = True
+            enemies.clear()
 
         # Boss movement
-        if boss:
+        if boss1:
 
-            boss["rect"].x += boss["speed"] * boss["direction"]
+            boss1["rect"].x += boss1["speed"] * boss1["direction"]
 
-            if boss["rect"].left <= 0 or boss["rect"].right >= WIDTH:
-                boss["direction"] *= -1
+            if boss1["rect"].left <= 0 or boss1["rect"].right >= WIDTH:
+                boss1["direction"] *= -1
+        
+        if boss2:
+
+            boss2["rect"].x += boss2["speed"] * boss2["direction"]
+
+            if boss2["rect"].left <= 0 or boss2["rect"].right >= WIDTH:
+                boss2["direction"] *= -1
 
         # Game over
         if lives <= 0:
@@ -328,17 +367,15 @@ while running:
         # Draw
         screen.fill(BLACK)
 
-        #draw boss
-        if boss:
-
-            background = pygame.image.load("resources/achtergrondsterren.jpg")
+        #draw bosses
+        if boss1:
             screen.blit(background, (0, 0))
             screen.blit(player_img, player)
 
 
             screen.blit(
                 bossfight1_img,
-                boss["rect"]
+                boss1["rect"]
             )
 
             # health bar
@@ -351,7 +388,25 @@ while running:
             pygame.draw.rect(
                 screen,
                 GREEN,
-                (200, 20, boss["health"] * 4, 20)
+                (200, 20, boss1["health"] * 4, 20)
+            )
+        
+        if boss2:
+            screen.blit(
+                bossfight2_img,
+                boss2["rect"]
+            )
+
+            pygame.draw.rect(
+                screen,
+                RED,
+                (200, 50, 400, 20)
+            )
+
+            pygame.draw.rect(
+                screen,
+                GREEN,
+                (200, 50, boss2["health"] * 2, 20)
             )
         
         #draw enemies
